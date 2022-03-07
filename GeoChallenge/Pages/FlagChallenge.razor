@@ -1,0 +1,376 @@
+﻿@page "/flagchallenge"
+
+@if (countries.Count == 0)
+{
+    <div>Loading...</div>
+}
+else
+{
+    <h1 class="bold-text" style="@notHidden">Which is the flag of @countries[0].Name?</h1>
+
+    <!--CHOICES-->
+    <div class="d-flex justify-content-center" style="@notHidden">
+        <img src="@flag1Src" class="choice" @onclick="() => { CheckAnswer(flag1Base64); RenderQuestion(); }" />
+        <img src="@flag2Src" class="choice margin" @onclick="() => { CheckAnswer(flag2Base64); RenderQuestion(); }" />
+        <img src="@flag3Src" class="choice" @onclick="() => { CheckAnswer(flag3Base64); RenderQuestion(); }" />
+    </div>
+    <div class="d-flex justify-content-center" style="@notHidden">
+        <img src="@flag4Src" class="choice" @onclick="() => { CheckAnswer(flag4Base64); RenderQuestion(); }" />
+        <img src="@flag5Src" class="choice margin" @onclick="() => { CheckAnswer(flag5Base64); RenderQuestion(); }" />
+        <img src="@flag6Src" class="choice" @onclick="() => { CheckAnswer(flag6Base64); RenderQuestion(); }" />
+    </div>
+
+    <div class="correct-answers" style="@hidden">Correct answers: @correctAnswers/10</div>
+    <div class="comment gray-text" style="@hidden">@comment</div>
+
+    <!--ENTER NAME-->
+    <div class="enter-name" style="@enterName">
+        <h3 class="mb-5">Enter your name</h3>
+        <EditForm Model="@highscore" OnValidSubmit="@EndGameAsync">
+            <div class="d-flex justify-content-center">
+                <InputText class="name-form" @bind-Value="highscore.PlayerName" />
+            </div>
+            <div class="invalid-input">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+            </div>
+            <div class="d-flex justify-content-center">
+                <button class="btn-primary" style="@enterName" type="submit">Ok</button>
+            </div>
+        </EditForm>
+    </div>
+
+    <!--TIMER-->
+    <div class="d-flex justify-content-center" style="@timerAndProgress">
+        @if (questionNumber < 11)
+        {
+            <div class="timer">@formattedTimer</div>
+        }
+        else
+        {
+            <div class="timer">@frozenTimer</div>
+        }
+    </div>
+
+    @if (score != 0)
+    {
+        <div class="score" style="@hidden">Score: @score.ToString("# ###")</div>
+    }
+    else
+    {
+        <div class="score" style="@hidden">Score: 0</div>
+    }
+
+    <!--PROGRESS-->
+    <div class="d-flex justify-content-center" style="@timerAndProgress">
+        <div class="circle" style="@circle1"></div>
+        <div class="circle" style="@circle2"></div>
+        <div class="circle" style="@circle3"></div>
+        <div class="circle" style="@circle4"></div>
+        <div class="circle" style="@circle5"></div>
+        <div class="circle" style="@circle6"></div>
+        <div class="circle" style="@circle7"></div>
+        <div class="circle" style="@circle8"></div>
+        <div class="circle" style="@circle9"></div>
+        <div class="circle" style="@circle10"></div>
+    </div>
+
+    <div class="d-flex justify-content-center">
+        <a class="btn-primary" style="@hidden" href="/selectgame">Back</a>
+    </div>
+}
+
+<!--FOOTER-->
+<div class="footer d-flex justify-content-center">
+    <a class="text-left" href="/selectgame"><i class="far fa-arrow-alt-circle-left"></i></a>
+    <p class="mt-3 mb-3">© 2021 GeoChallenge. All rights reserved.</p>
+</div>
+
+@code {
+    private HighscoreModel highscore;
+    private List<CountryModel> countries = new List<CountryModel>();
+    private List<CountryModel> countriesMixed = new List<CountryModel>();
+    private static Random random = new Random();
+    private string answer;
+    private TimeSpan timer = new TimeSpan();
+    private bool timerRunning = true;
+    private string formattedTimer;
+    private string frozenTimer;
+    private int questionNumber = 1;
+    private int correctAnswers = 0;
+    private int score = 0;
+    private string comment;
+
+    string flag1Base64;
+    string flag2Base64;
+    string flag3Base64;
+    string flag4Base64;
+    string flag5Base64;
+    string flag6Base64;
+    string flag1Src;
+    string flag2Src;
+    string flag3Src;
+    string flag4Src;
+    string flag5Src;
+    string flag6Src;
+
+    private string circle1;
+    private string circle2;
+    private string circle3;
+    private string circle4;
+    private string circle5;
+    private string circle6;
+    private string circle7;
+    private string circle8;
+    private string circle9;
+    private string circle10;
+
+    private string notHidden;
+    private string hidden;
+    private string timerAndProgress;
+    private string enterName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        highscore = new HighscoreModel();
+        await GetCountriesAsync();
+        MixFlags();
+        await StartTimerAsync();
+    }
+
+    private async Task GetCountriesAsync()
+    {
+        countries = await http.GetFromJsonAsync<List<CountryModel>>("https://localhost:44362/api/Countries");
+        countries = countries.OrderBy(x => random.Next()).ToList();
+    }
+
+    private void MixFlags()
+    {
+        answer = Convert.ToBase64String(countries[0].Flag);
+        countriesMixed = countries.GetRange(0, 6);
+        countriesMixed = countriesMixed.OrderBy(x => random.Next()).ToList();
+
+        flag1Base64 = Convert.ToBase64String(countriesMixed[0].Flag);
+        flag2Base64 = Convert.ToBase64String(countriesMixed[1].Flag);
+        flag3Base64 = Convert.ToBase64String(countriesMixed[2].Flag);
+        flag4Base64 = Convert.ToBase64String(countriesMixed[3].Flag);
+        flag5Base64 = Convert.ToBase64String(countriesMixed[4].Flag);
+        flag6Base64 = Convert.ToBase64String(countriesMixed[5].Flag);
+
+        flag1Src = String.Format("data:image/png;base64,{0}", flag1Base64);
+        flag2Src = String.Format("data:image/png;base64,{0}", flag2Base64);
+        flag3Src = String.Format("data:image/png;base64,{0}", flag3Base64);
+        flag4Src = String.Format("data:image/png;base64,{0}", flag4Base64);
+        flag5Src = String.Format("data:image/png;base64,{0}", flag5Base64);
+        flag6Src = String.Format("data:image/png;base64,{0}", flag6Base64);
+    }
+
+    private void UpdateLists()
+    {
+        countries.RemoveRange(0, 6);
+        countriesMixed.Clear();
+    }
+
+    private void CheckAnswer(string chosenAnswer)
+    {
+        if (chosenAnswer == answer)
+        {
+            switch (questionNumber)
+            {
+                case 1:
+                    circle1 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 2:
+                    circle2 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 3:
+                    circle3 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 4:
+                    circle4 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 5:
+                    circle5 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 6:
+                    circle6 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 7:
+                    circle7 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 8:
+                    circle8 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 9:
+                    circle9 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+                case 10:
+                    circle10 = "background-image: linear-gradient(to bottom, #97D336, #4B8700)";
+                    break;
+            }
+            correctAnswers++;
+            score += 10000;
+            if (questionNumber == 10)
+            {
+                frozenTimer = formattedTimer;
+                StopTimer();
+                EnterNameAsync().GetAwaiter();
+            }
+            questionNumber++;
+        }
+
+        else
+        {
+            switch (questionNumber)
+            {
+                case 1:
+                    circle1 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 2:
+                    circle2 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 3:
+                    circle3 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 4:
+                    circle4 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 5:
+                    circle5 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 6:
+                    circle6 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 7:
+                    circle7 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 8:
+                    circle8 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 9:
+                    circle9 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+                case 10:
+                    circle10 = "background-image: linear-gradient(to bottom, #FF1A1A, #B30000)";
+                    break;
+            }
+            if (questionNumber == 10)
+            {
+                frozenTimer = formattedTimer;
+                StopTimer();
+                EnterNameAsync().GetAwaiter();
+            }
+            questionNumber++;
+        }
+    }
+
+    private void RenderQuestion()
+    {
+        Console.WriteLine(questionNumber);
+        if (questionNumber < 11)
+        {
+            UpdateLists();
+            countries = countries.OrderBy(x => random.Next()).ToList();
+            MixFlags();
+            StateHasChanged();
+        }
+    }
+
+    private async Task StartTimerAsync()
+    {
+        while (timerRunning)
+        {
+            await Task.Delay(1000);
+            timer = timer.Add(new TimeSpan(0, 0, 1));
+            formattedTimer = timer.ToString("mm\\:ss");
+            StateHasChanged();
+        }
+    }
+
+    private void StopTimer()
+    {
+        timerRunning = false;
+    }
+
+    private void CalculateScore()
+    {
+        int scoreReduction = (int)timer.TotalSeconds * 100;
+        scoreReduction -= 100;
+        score -= scoreReduction;
+        if (score < 0)
+        {
+            score = 0;
+        }
+    }
+
+    private async Task EnterNameAsync()
+    {
+        await Task.Delay(2000);
+        notHidden = "display: none !important";
+        timerAndProgress = "display: none !important";
+        enterName = "display: block !important";
+        StateHasChanged();
+    }
+
+    private void RenderComment()
+    {
+        switch (correctAnswers)
+        {
+            case 0:
+                comment = "You suck!";
+                break;
+            case 1:
+                comment = "Terrible!";
+                break;
+            case 2:
+                comment = "Go back to school!";
+                break;
+            case 3:
+                comment = "Maybe you should work on your geography skills?";
+                break;
+            case 4:
+                comment = "Not very good...";
+                break;
+            case 5:
+                comment = "Ok, but you can do better.";
+                break;
+            case 6:
+                comment = "Pretty good!";
+                break;
+            case 7:
+                comment = "Good!";
+                break;
+            case 8:
+                comment = "Very good!";
+                break;
+            case 9:
+                comment = "Very impressive!";
+                break;
+            case 10:
+                comment = "Amazing, you are a true master of geography!";
+                break;
+        }
+    }
+
+    private async Task EndGameAsync()
+    {
+        CalculateScore();
+        RenderComment();
+        enterName = "display: none !important";
+        hidden = "display: block !important";
+        timerAndProgress = "display: flex !important; justify-content: center";
+        StateHasChanged();
+        await SubmitHighscoreAsync();
+    }
+
+    private async Task SubmitHighscoreAsync()
+    {
+        highscore.Date = DateTime.Now;
+        highscore.Game = "FlagChallenge";
+        highscore.Score = score;
+        if (score != 0)
+        {
+            await http.PostAsJsonAsync<HighscoreModel>("https://localhost:44362/api/Highscores", highscore);
+        }
+    }
+}

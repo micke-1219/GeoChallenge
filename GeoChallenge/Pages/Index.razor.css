@@ -1,0 +1,27 @@
+﻿a { 
+    width: 15rem;
+}
+
+.earth {
+    height: 400px;
+    width: auto;
+    margin-top: 5rem;
+}
+
+.title {
+    font-family: 'Neucha', cursive;
+    font-size: 60px;
+    text-align: center;
+}
+
+/* Medium devices (899px and down) */
+@media (max-height: 899px) {
+    .earth {
+        height: 300px;
+        width: auto;
+    }
+
+    .title {
+        font-size: 50px;
+    }
+}

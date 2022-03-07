@@ -1,0 +1,109 @@
+﻿h1 {
+    text-align: center;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+}
+
+h4 {
+    text-align: center;
+}
+
+.card {
+    text-align: center;
+    box-shadow: 1px 1px 20px lightgrey;
+    margin: 0;
+    border: none;
+    height: 510px;
+    width: 450px;
+    padding: 50px;
+}
+
+.empty-card {
+    box-shadow: 1px 1px 20px lightgrey;
+    margin: 0;
+    border: none;
+    height: 510px;
+    width: 450px;
+}
+
+.highscore-position {
+    font-size: 18px;
+    text-align: left;
+    width: 50px;
+}
+
+.highscore-score {
+    font-size: 18px;
+    text-align: left;
+    width: 100px;
+}
+
+.highscore-name {
+    font-size: 18px;
+    text-align: left;
+    width: 100px;
+}
+
+.highscore-date {
+    font-size: 18px;
+    text-align: right;
+    width: 100px;
+}
+
+/* Medium devices (899px and down) */
+@media (max-height: 899px) {
+    .me-5 {
+        margin-right: 1rem !important;
+    }
+
+    .ms-5 {
+        margin-left: 1rem !important;
+    }
+
+    h1 {
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+    }
+
+    .card {
+        text-align: center;
+        box-shadow: 1px 1px 20px lightgrey;
+        margin: 0;
+        border: none;
+        height: 480px;
+        width: 400px;
+        padding: 30px;
+    }
+
+    .empty-card {
+        box-shadow: 1px 1px 20px lightgrey;
+        margin: 0;
+        border: none;
+        height: 480px;
+        width: 400px;
+    }
+
+    .highscore-position {
+        font-size: 16px;
+        text-align: left;
+        width: 40px;
+    }
+
+    .highscore-score {
+        font-size: 16px;
+        text-align: left;
+        width: 100px;
+    }
+
+    .highscore-name {
+        font-size: 16px;
+        text-align: left;
+        width: 100px;
+    }
+
+    .highscore-date {
+        font-size: 16px;
+        text-align: right;
+        width: 100px;
+    }
+}

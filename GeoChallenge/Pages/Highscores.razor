@@ -1,0 +1,107 @@
+﻿@page "/highscores"
+
+<h1 class="bold-text">Highscores</h1>
+
+<div class="d-flex justify-content-center">
+
+    <!--CAPITAL CHALLENGE-->
+    <div class="card me-5">
+        <h4 class="bold-text mb-5">Capital Challenge</h4>
+        @foreach (var highscore in highscoresCapitalChallenge.Take(10))
+        {
+            <div class="d-flex justify-content-between mb-3">
+                <div class="highscore-position">
+                    <p>@positionCapitalChallenge @{ positionCapitalChallenge++; }</p>
+                </div>
+                <div class="highscore-score">
+                    <p>@highscore.Score.ToString("# ###")</p>
+                </div>
+                <div class="highscore-name">
+                    <p>@highscore.PlayerName</p>
+                </div>
+                <div class="highscore-date">
+                    <p>@highscore.Date.ToShortDateString()</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!--FLAG CHALLENGE-->
+    <div class="card ms-5 me-5">
+        <h4 class="bold-text mb-5">Flag Challenge</h4>
+        @foreach (var highscore in highscoresFlagChallenge.Take(10))
+        {
+            <div class="d-flex justify-content-center mb-3">
+                <div class="highscore-position">
+                    <p>@positionFlagChallenge @{ positionFlagChallenge++; }</p>
+                </div>
+                <div class="highscore-score">
+                    <p>@highscore.Score.ToString("# ###")</p>
+                </div>
+                <div class="highscore-name">
+                    <p>@highscore.PlayerName</p>
+                </div>
+                <div class="highscore-date">
+                    <p>@highscore.Date.ToShortDateString()</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!--POPULATION CHALLENGE-->
+    <div class="card ms-5">
+        <h4 class="bold-text mb-5">Population Challenge</h4>
+        @foreach (var highscore in highscoresPopulationChallenge.Take(10))
+        {
+            <div class="d-flex justify-content-center mb-3">
+                <div class="highscore-position">
+                    <p>@positionPopulationChallenge @{ positionPopulationChallenge++; }</p>
+                </div>
+                <div class="highscore-score">
+                    <p>@highscore.Score.ToString("# ###")</p>
+                </div>
+                <div class="highscore-name">
+                    <p>@highscore.PlayerName</p>
+                </div>
+                <div class="highscore-date">
+                    <p>@highscore.Date.ToShortDateString()</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!--FOOTER-->
+<div class="footer d-flex justify-content-center">
+    <a class="text-left" href="/"><i class="far fa-arrow-alt-circle-left"></i></a>
+    <p class="mt-3 mb-3">© 2021 GeoChallenge. All rights reserved.</p>
+</div>
+
+@code {
+    int positionCapitalChallenge = 1;
+    int positionFlagChallenge = 1;
+    int positionPopulationChallenge = 1;
+    private List<HighscoreModel> highscoresCapitalChallenge = new List<HighscoreModel>();
+    private List<HighscoreModel> highscoresFlagChallenge = new List<HighscoreModel>();
+    private List<HighscoreModel> highscoresPopulationChallenge = new List<HighscoreModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetHighscoresAsync();
+    }
+
+    private async Task GetHighscoresAsync()
+    {
+        highscoresCapitalChallenge = await http.GetFromJsonAsync<List<HighscoreModel>>("https://localhost:44362/api/Highscores");
+        highscoresCapitalChallenge = highscoresCapitalChallenge.Where(x => x.Game == "CapitalChallenge").ToList();
+        highscoresCapitalChallenge = highscoresCapitalChallenge.OrderByDescending(highscore => highscore.Score).ToList();
+
+        highscoresFlagChallenge = await http.GetFromJsonAsync<List<HighscoreModel>>("https://localhost:44362/api/Highscores");
+        highscoresFlagChallenge = highscoresFlagChallenge.Where(x => x.Game == "FlagChallenge").ToList();
+        highscoresFlagChallenge = highscoresFlagChallenge.OrderByDescending(highscore => highscore.Score).ToList();
+
+        highscoresPopulationChallenge = await http.GetFromJsonAsync<List<HighscoreModel>>("https://localhost:44362/api/Highscores");
+        highscoresPopulationChallenge = highscoresPopulationChallenge.Where(x => x.Game == "PopulationChallenge").ToList();
+        highscoresPopulationChallenge = highscoresPopulationChallenge.OrderByDescending(highscore => highscore.Score).ToList();
+    }
+}
